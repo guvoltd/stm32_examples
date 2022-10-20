@@ -54,7 +54,8 @@
 //
 //*****************************************************************************
 #include "socket.h"
-
+#include <stdio.h>
+#include <string.h>
 //M20150401 : Typing Error
 //#define SOCK_ANY_PORT_NUM  0xC000;
 #define SOCK_ANY_PORT_NUM  0xC000
@@ -116,17 +117,23 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
             */
             uint32_t taddr;
             getSIPR((uint8_t*)&taddr);
-            if(taddr == 0) return SOCKERR_SOCKINIT;
+            if(taddr == 0) {
+            	printf("%s >> Error Socker Init Returning..\n", __func__);
+            	return SOCKERR_SOCKINIT;
+            }
          }
+         break;
       case Sn_MR_UDP :
       case Sn_MR_MACRAW :
 	  case Sn_MR_IPRAW :
+		  printf("%s >> Doing Nothing in Switch [%d] .. \n", __func__, protocol);
          break;
    #if ( _WIZCHIP_ < 5200 )
       case Sn_MR_PPPoE :
          break;
    #endif
       default :
+    	  printf("%s >>Error Socket not define Returning..\n", __func__);
          return SOCKERR_SOCKMODE;
 	}
 	//M20150601 : For SF_TCP_ALIGN & W5300
@@ -135,7 +142,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 #if _WIZCHIP_ == 5200
    if(flag & 0x10) return SOCKERR_SOCKFLAG;
 #endif
-	   
+   printf("%s >> Proceeds Flag value [%d] ..\n", __func__, flag);
 	if(flag != 0)
 	{
    	switch(protocol)
@@ -165,6 +172,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    	      break;
    	}
    }
+	printf("%s >> Proceeds without error..\n", __func__);
 	close(sn);
 	//M20150601
 	#if _WIZCHIP_ == 5300
@@ -191,6 +199,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    sock_pack_info[sn] = PACK_COMPLETED;
    //
    while(getSn_SR(sn) == SOCK_CLOSED);
+   printf("%s >> Returning [%d]..\n", __func__, sn);
    return (int8_t)sn;
 }	   
 
@@ -256,8 +265,11 @@ int8_t listen(uint8_t sn)
 int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
 {
    CHECK_SOCKNUM();
+   //printf("%s >> Socket Number 1 [%d]..\n",__func__, sn);
    CHECK_SOCKMODE(Sn_MR_TCP);
+   //printf("%s >> Socket Number 2 [%d]..\n",__func__, sn);
    CHECK_SOCKINIT();
+   //printf("%s >> Socket Number 3 [%d]..\n",__func__, sn);
    //M20140501 : For avoiding fatal error on memory align mismatched
    //if( *((uint32_t*)addr) == 0xFFFFFFFF || *((uint32_t*)addr) == 0) return SOCKERR_IPINVALID;
    {
@@ -269,11 +281,18 @@ int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
       if( taddr == 0xFFFFFFFF || taddr == 0) return SOCKERR_IPINVALID;
    }
    //
-	
+	//printf("%s >> Proceeded here 1, ...\n", __func__);
 	if(port == 0) return SOCKERR_PORTZERO;
 	setSn_DIPR(sn,addr);
 	setSn_DPORT(sn,port);
 	setSn_CR(sn,Sn_CR_CONNECT);
+	memset(addr, 0x0, 4);
+	getSn_DIPR(sn,addr);
+	printf("%s >> Get Set IP : [%d, %d, %d, %d]\n",__func__, addr[0], addr[1], addr[2], addr[3]);
+	printf("%s >> Get Socket Port [%d]..\n",__func__, getSn_DPORT(sn));
+	printf("%s >> Socket Number 3 [%d]..\n",__func__, sn);
+
+
    while(getSn_CR(sn));
    if(sock_io_mode & (1<<sn)) return SOCK_BUSY;
    while(getSn_SR(sn) != SOCK_ESTABLISHED)

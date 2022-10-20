@@ -19,6 +19,13 @@ uint8_t NTP_SOCKET;
 uint8_t time_zone;
 uint16_t ntp_retry_cnt=0; //counting the ntp retry number
 
+/* Callback heandler */
+void (*ntp_time_assign)(void);
+/* Callback reg */
+void reg_ntp_cbfunc(void(*time_assign)(void))
+{
+   ntp_time_assign = time_assign;
+}
 /*
 00)UTC-12:00 Baker Island, Howland Island (both uninhabited)
 01) UTC-11:00 American Samoa, Samoa
@@ -132,7 +139,7 @@ void get_seconds_from_ntp_server(uint8_t *buf, uint16_t idx)
 	case 20:
 		seconds -=  1*3600;
 		break;
-	case 21:                            //ï¼?
+	case 21:                            //ï¿½?
 	case 22:
 		break;
 	case 23:
@@ -250,67 +257,68 @@ void SNTP_init(uint8_t s, uint8_t *ntp_server, uint8_t tz, uint8_t *buf)
 int8_t SNTP_run(datetime *time)
 {
 	uint16_t RSR_len;
-	uint32_t destip = 0;
-	uint16_t destport;
-	uint16_t startindex = 40; //last 8-byte of data_buf[size is 48 byte] is xmt, so the startindex should be 40
+		uint32_t destip = 0;
+		uint16_t destport;
+		uint16_t startindex = 40; //last 8-byte of data_buf[size is 48 byte] is xmt, so the startindex should be 40
 
-	switch(getSn_SR(NTP_SOCKET))
-	{
-	case SOCK_UDP:
-		if ((RSR_len = getSn_RX_RSR(NTP_SOCKET)) > 0)
+		switch(getSn_SR(NTP_SOCKET))
 		{
-			if (RSR_len > MAX_SNTP_BUF_SIZE) RSR_len = MAX_SNTP_BUF_SIZE;	// if Rx data size is lager than TX_RX_MAX_BUF_SIZE
-			recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport);
-
-			get_seconds_from_ntp_server(data_buf,startindex);
-			time->yy = Nowdatetime.yy;
-			time->mo = Nowdatetime.mo;
-			time->dd = Nowdatetime.dd;
-			time->hh = Nowdatetime.hh;
-			time->mm = Nowdatetime.mm;
-			time->ss = Nowdatetime.ss;
-
-			ntp_retry_cnt=0;
-			close(NTP_SOCKET);
-
-			return 1;
-		}
-
-		if(ntp_retry_cnt<0xFFFF)
-		{
-			if(ntp_retry_cnt==0)//first send request, no need to wait
+		case SOCK_UDP:
+			if ((RSR_len = getSn_RX_RSR(NTP_SOCKET)) > 0)
 			{
-				sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
-				ntp_retry_cnt++;
+				if (RSR_len > MAX_SNTP_BUF_SIZE) RSR_len = MAX_SNTP_BUF_SIZE;	// if Rx data size is lager than TX_RX_MAX_BUF_SIZE
+				recvfrom(NTP_SOCKET, data_buf, RSR_len, (uint8_t *)&destip, &destport);
+
+				get_seconds_from_ntp_server(data_buf,startindex);
+				time->yy = Nowdatetime.yy;
+				time->mo = Nowdatetime.mo;
+				time->dd = Nowdatetime.dd;
+				time->hh = Nowdatetime.hh;
+				time->mm = Nowdatetime.mm;
+				time->ss = Nowdatetime.ss;
+
+				ntp_retry_cnt=0;
+				close(NTP_SOCKET);
+				ntp_time_assign();
+
+				return 1;
 			}
-			else // send request again? it should wait for a while
+
+			if(ntp_retry_cnt<0xFFFF)
 			{
-				if((ntp_retry_cnt % 0xFFF) == 0) //wait time
+				if(ntp_retry_cnt==0)//first send request, no need to wait
 				{
 					sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
-#ifdef _SNTP_DEBUG_
-					printf("ntp retry: %d\r\n", ntp_retry_cnt);
-#endif
 					ntp_retry_cnt++;
 				}
+				else // send request again? it should wait for a while
+				{
+					if((ntp_retry_cnt % 0xFFF) == 0) //wait time
+					{
+						sendto(NTP_SOCKET,ntpmessage,sizeof(ntpmessage),NTPformat.dstaddr,ntp_port);
+	#ifdef _SNTP_DEBUG_
+						printf("ntp retry: %d\r\n", ntp_retry_cnt);
+	#endif
+						ntp_retry_cnt++;
+					}
+				}
 			}
+			else //ntp retry fail
+			{
+				ntp_retry_cnt=0;
+	#ifdef _SNTP_DEBUG_
+				printf("ntp retry failed!\r\n");
+	#endif
+				close(NTP_SOCKET);
+			}
+			break;
+		case SOCK_CLOSED:
+			socket(NTP_SOCKET,Sn_MR_UDP,ntp_port,0);
+			break;
 		}
-		else //ntp retry fail
-		{
-			ntp_retry_cnt=0;
-#ifdef _SNTP_DEBUG_
-			printf("ntp retry failed!\r\n");
-#endif
-			close(NTP_SOCKET);
-		}
-		break;
-	case SOCK_CLOSED:
-		socket(NTP_SOCKET,Sn_MR_UDP,ntp_port,0);
-		break;
-	}
-	// Return value
-	// 0 - failed / 1 - success
-	return 0;
+		// Return value
+		// 0 - failed / 1 - success
+		return 0;
 }
 
 void calcdatetime(tstamp seconds)

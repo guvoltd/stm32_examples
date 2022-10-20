@@ -69,6 +69,7 @@ int8_t SNTP_run(datetime *time);
 tstamp changedatetime_to_seconds(void);
 void calcdatetime(tstamp seconds);
 
+
 #ifdef __cplusplus
 }
 #endif

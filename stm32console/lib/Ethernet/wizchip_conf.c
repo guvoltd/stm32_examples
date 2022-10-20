@@ -1,4 +1,3 @@
-/* vim: set ai et ts=4 sw=4: */
 //****************************************************************************/ 
 //!
 //! \file wizchip_conf.c
@@ -64,33 +63,32 @@
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void       wizchip_cris_enter(void)           {};
-void       wizchip_cris_enter(void)           {}
+//void 	  wizchip_cris_enter(void)           {};
+void 	  wizchip_cris_enter(void)           {}
 
 /**
  * @brief Default function to disable interrupt.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void       wizchip_cris_exit(void)          {};
-void       wizchip_cris_exit(void)          {}
+//void 	  wizchip_cris_exit(void)          {};
+void 	  wizchip_cris_exit(void)          {}
 
 /**
  * @brief Default function to select chip.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void     wizchip_cs_select(void)            {};
-
-void wizchip_cs_select(void) {}
+//void 	wizchip_cs_select(void)            {};
+void 	wizchip_cs_select(void)            {}
 
 /**
  * @brief Default function to deselect chip.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void     wizchip_cs_deselect(void)          {};
-void wizchip_cs_deselect(void) { }
+//void 	wizchip_cs_deselect(void)          {};
+void 	wizchip_cs_deselect(void)          {}
 
 /**
  * @brief Default function to read in direct or indirect interface.
@@ -107,8 +105,8 @@ iodata_t wizchip_bus_readdata(uint32_t AddrSel) { return * ((volatile iodata_t *
  * null function is called.
  */
 //M20150601 : Rename the function for integrating with W5300
-//void     wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*)((ptrdiff_t)AddrSel)) = wb; }
-void     wizchip_bus_writedata(uint32_t AddrSel, iodata_t wb)  { *((volatile iodata_t*)((ptrdiff_t)AddrSel)) = wb; }
+//void 	wizchip_bus_writebyte(uint32_t AddrSel, uint8_t wb)  { *((volatile uint8_t*)((ptrdiff_t)AddrSel)) = wb; }
+void 	wizchip_bus_writedata(uint32_t AddrSel, iodata_t wb)  { *((volatile iodata_t*)((ptrdiff_t)AddrSel)) = wb; }
 
 /**
  * @brief Default function to read in SPI interface.
@@ -123,24 +121,24 @@ uint8_t wizchip_spi_readbyte(void)        {return 0;}
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void     wizchip_spi_writebyte(uint8_t wb) {};
-void     wizchip_spi_writebyte(uint8_t wb) {}
+//void 	wizchip_spi_writebyte(uint8_t wb) {};
+void 	wizchip_spi_writebyte(uint8_t wb) {}
 
 /**
  * @brief Default function to burst read in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void     wizchip_spi_readburst(uint8_t* pBuf, uint16_t len)     {}; 
-void     wizchip_spi_readburst(uint8_t* pBuf, uint16_t len)     {}
+//void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}; 
+void 	wizchip_spi_readburst(uint8_t* pBuf, uint16_t len) 	{}
 
 /**
  * @brief Default function to burst write in SPI interface.
  * @note This function help not to access wrong address. If you do not describe this function or register any functions,
  * null function is called.
  */
-//void     wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
-void     wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
+//void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {};
+void 	wizchip_spi_writeburst(uint8_t* pBuf, uint16_t len) {}
 
 /**
  * @\ref _WIZCHIP instance
@@ -285,7 +283,7 @@ void reg_wizchip_spiburst_cbfunc(void (*spi_rb)(uint8_t* pBuf, uint16_t len), vo
 
 int8_t ctlwizchip(ctlwizchip_type cwtype, void* arg)
 {
-#if    _WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
+#if	_WIZCHIP_ == W5100S || _WIZCHIP_ == W5200 || _WIZCHIP_ == W5500
    uint8_t tmp = 0;
 #endif
    uint8_t* ptmp[2] = {0,0};
@@ -431,13 +429,13 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
       tmp = 0;
    //M20150601 : For integrating with W5300
    #if _WIZCHIP_ == W5300
-        for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-        {
-            if(txsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
-            tmp += txsize[i];
-            if(tmp > 128) return -1;
-        }
-        if(tmp % 8) return -1;
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			if(txsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
+			tmp += txsize[i];
+			if(tmp > 128) return -1;
+		}
+		if(tmp % 8) return -1;
    #else
         for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
         {
@@ -468,34 +466,34 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
       tmp = 0;
    #if _WIZCHIP_ == W5300
       for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-        {
-            if(rxsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
-            tmp += rxsize[i];
-            if(tmp > 128) return -1;
-        }
-        if(tmp % 8) return -1;
+		{
+			if(rxsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
+			tmp += rxsize[i];
+			if(tmp > 128) return -1;
+		}
+		if(tmp % 8) return -1;
    #else
-        for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-        {
-            tmp += rxsize[i];
-        #if _WIZCHIP_ < W5200    //2016.10.28 peter add condition for w5100 and w5100s
-            if(tmp > 8) return -1;
-        #else
-            if(tmp > 16) return -1;
-        #endif
-        }
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			tmp += rxsize[i];
+		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
+			if(tmp > 8) return -1;
+		#else
+			if(tmp > 16) return -1;
+		#endif
+		}
 
-        for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-        {
-        #if _WIZCHIP_ < W5200    // add condition for w5100
-            j = 0;
-            while((rxsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
-            setSn_RXBUF_SIZE(i, j);
-        #else
-            setSn_RXBUF_SIZE(i, rxsize[i]);
-        #endif
-        }
-    #endif
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+		#if _WIZCHIP_ < W5200	// add condition for w5100
+			j = 0;
+			while((rxsize[i] >> j != 1)&&(txsize[i] !=0)){j++;}
+			setSn_RXBUF_SIZE(i, j);
+		#else
+			setSn_RXBUF_SIZE(i, rxsize[i]);
+		#endif
+		}
+	#endif
    }
    return 0;
 }
@@ -616,7 +614,7 @@ int8_t wizphy_getphylink(void)
    int8_t tmp = PHY_LINK_OFF;
 #if _WIZCHIP_ == W5100S
    if(getPHYSR() & PHYSR_LNK)
-       tmp = PHY_LINK_ON;
+	   tmp = PHY_LINK_ON;
 #elif   _WIZCHIP_ == W5200
    if(getPHYSTATUS() & PHYSTATUS_LINK)
       tmp = PHY_LINK_ON;
@@ -655,10 +653,10 @@ int8_t wizphy_getphypmode(void)
 #if _WIZCHIP_ == W5100S
 void wizphy_reset(void)
 {
-    uint16_t tmp = wiz_mdio_read(PHYMDIO_BMCR);
-    tmp |= BMCR_RESET;
-    wiz_mdio_write(PHYMDIO_BMCR, tmp);
-    while(wiz_mdio_read(PHYMDIO_BMCR)&BMCR_RESET){}
+	uint16_t tmp = wiz_mdio_read(PHYMDIO_BMCR);
+	tmp |= BMCR_RESET;
+	wiz_mdio_write(PHYMDIO_BMCR, tmp);
+	while(wiz_mdio_read(PHYMDIO_BMCR)&BMCR_RESET){}
 }
 
 void wizphy_setphyconf(wiz_PhyConf* phyconf)
@@ -668,22 +666,22 @@ void wizphy_setphyconf(wiz_PhyConf* phyconf)
       tmp |= BMCR_AUTONEGO;
    else
    {
-      tmp &= ~BMCR_AUTONEGO;
+	  tmp &= ~BMCR_AUTONEGO;
       if(phyconf->duplex == PHY_DUPLEX_FULL)
       {
-          tmp |= BMCR_DUP;
+    	  tmp |= BMCR_DUP;
       }
       else
       {
-          tmp &= ~BMCR_DUP;
+    	  tmp &= ~BMCR_DUP;
       }
       if(phyconf->speed == PHY_SPEED_100)
       {
-          tmp |= BMCR_SPEED;
+    	  tmp |= BMCR_SPEED;
       }
       else
       {
-          tmp &= ~BMCR_SPEED;
+    	  tmp &= ~BMCR_SPEED;
       }
    }
    wiz_mdio_write(PHYMDIO_BMCR, tmp);
@@ -696,15 +694,15 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf)
    phyconf->by   = PHY_CONFBY_SW;
    if(tmp & BMCR_AUTONEGO)
    {
-       phyconf->mode = PHY_MODE_AUTONEGO;
+	   phyconf->mode = PHY_MODE_AUTONEGO;
    }
    else
    {
-       phyconf->mode = PHY_MODE_MANUAL;
-       if(tmp&BMCR_DUP) phyconf->duplex = PHY_DUPLEX_FULL;
-       else phyconf->duplex = PHY_DUPLEX_HALF;
-       if(tmp&BMCR_SPEED) phyconf->speed = PHY_SPEED_100;
-       else phyconf->speed = PHY_SPEED_10;
+	   phyconf->mode = PHY_MODE_MANUAL;
+	   if(tmp&BMCR_DUP) phyconf->duplex = PHY_DUPLEX_FULL;
+	   else phyconf->duplex = PHY_DUPLEX_HALF;
+	   if(tmp&BMCR_SPEED) phyconf->speed = PHY_SPEED_100;
+	   else phyconf->speed = PHY_SPEED_10;
    }
 }
 
@@ -718,7 +716,7 @@ int8_t wizphy_setphypmode(uint8_t pmode)
    }
    else
    {
-       tmp &= ~BMCR_PWDN;
+	   tmp &= ~BMCR_PWDN;
    }
    wiz_mdio_write(PHYMDIO_BMCR, tmp);
    tmp = wiz_mdio_read(PHYMDIO_BMCR);

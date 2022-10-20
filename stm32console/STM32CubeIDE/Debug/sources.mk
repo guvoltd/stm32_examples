@@ -24,18 +24,13 @@ SUBDIRS := \
 Application/User/Core \
 Application/User/Startup \
 Application/User/lib/Application/loopback \
-Application/User/lib/Ethernet/W5100 \
-Application/User/lib/Ethernet/W5100S \
-Application/User/lib/Ethernet/W5200 \
-Application/User/lib/Ethernet/W5300 \
 Application/User/lib/Ethernet/W5500 \
 Application/User/lib/Ethernet \
 Application/User/lib/Internet/DHCP \
 Application/User/lib/Internet/DNS \
-Application/User/lib/Internet/MQTT \
-Application/User/lib/Internet/MQTT/MQTTPacket/src \
 Application/User/lib/Internet/SNTP \
-Application/User/lib/Internet/httpServer \
+Application/User/lib/modbus \
+Application/User/lib/modbus/src \
 Drivers/CMSIS \
 Drivers/STM32F4xx_HAL_Driver \
 

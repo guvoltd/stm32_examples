@@ -11,17 +11,12 @@ RM := rm -rf
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/subdir.mk
 -include Drivers/CMSIS/subdir.mk
--include Application/User/lib/Internet/httpServer/subdir.mk
+-include Application/User/lib/modbus/src/subdir.mk
+-include Application/User/lib/modbus/subdir.mk
 -include Application/User/lib/Internet/SNTP/subdir.mk
--include Application/User/lib/Internet/MQTT/MQTTPacket/src/subdir.mk
--include Application/User/lib/Internet/MQTT/subdir.mk
 -include Application/User/lib/Internet/DNS/subdir.mk
 -include Application/User/lib/Internet/DHCP/subdir.mk
 -include Application/User/lib/Ethernet/W5500/subdir.mk
--include Application/User/lib/Ethernet/W5300/subdir.mk
--include Application/User/lib/Ethernet/W5200/subdir.mk
--include Application/User/lib/Ethernet/W5100S/subdir.mk
--include Application/User/lib/Ethernet/W5100/subdir.mk
 -include Application/User/lib/Ethernet/subdir.mk
 -include Application/User/lib/Application/loopback/subdir.mk
 -include Application/User/Startup/subdir.mk
@@ -74,8 +69,8 @@ all: main-build
 main-build: stm32console.elf secondary-outputs
 
 # Tool invocations
-stm32console.elf stm32console.map: $(OBJS) $(USER_OBJS) D:\Urvil\temp\stm32console\STM32CubeIDE\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "stm32console.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Urvil\temp\stm32console\STM32CubeIDE\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32console.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+stm32console.elf stm32console.map: $(OBJS) $(USER_OBJS) D:\Urvil\urvilGit\stm32_examples\stm32console\STM32CubeIDE\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "stm32console.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Urvil\urvilGit\stm32_examples\stm32console\STM32CubeIDE\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32console.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -162,7 +162,7 @@ void     WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    WIZCHIP.CS._select();
 
    AddrSel |= (_W5500_SPI_WRITE_ | _W5500_SPI_VDM_OP_);
-
+   //printf("%s>> bust mode : [%d]\n", __func__, WIZCHIP.IF.SPI._write_burst);
    if(!WIZCHIP.IF.SPI._write_burst) 	// byte operation
    {
 		WIZCHIP.IF.SPI._write_byte((AddrSel & 0x00FF0000) >> 16);
