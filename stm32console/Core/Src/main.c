@@ -47,6 +47,7 @@
 /* USER CODE BEGIN PD */
 // ============================================= DHCP MODE ENABLE =============
 //#define USER_MODE_DHCP
+
 #ifdef  USER_MODE_DHCP
 	#include "dhcp.h"
 	#include "dns.h"
@@ -145,9 +146,35 @@ void W5500_WriteByte(uint8_t byte) {
 }
 
 #ifdef USER_MODE_DHCP
+
 void Callback_IPAssigned(void) {
     printf("Callback: IP assigned! Leased time: %ld sec\r\n", getDHCPLeasetime());
     ip_assigned = true;
+}
+
+static void Net_Conf(wiz_NetInfo gWIZNETINFO)
+{
+	/* wizchip netconf */
+	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
+}
+
+static void Display_Net_Conf(void)
+{
+
+	uint8_t tmpstr[6] = {0,};
+	wiz_NetInfo gWIZNETINFO;
+	ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
+
+	// Display Network Information
+	ctlwizchip(CW_GET_ID,(void*)tmpstr);
+
+	if(gWIZNETINFO.dhcp == NETINFO_DHCP) printf("\r\n===== %s NET CONF : DHCP =====\r\n",(char*)tmpstr);
+		else printf("\r\n===== %s NET CONF : Static =====\r\n",(char*)tmpstr);
+	printf(" MAC : %02X:%02X:%02X:%02X:%02X:%02X\r\n", gWIZNETINFO.mac[0], gWIZNETINFO.mac[1], gWIZNETINFO.mac[2], gWIZNETINFO.mac[3], gWIZNETINFO.mac[4], gWIZNETINFO.mac[5]);
+	printf(" IP : %d.%d.%d.%d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3]);
+	printf(" GW : %d.%d.%d.%d\r\n", gWIZNETINFO.gw[0], gWIZNETINFO.gw[1], gWIZNETINFO.gw[2], gWIZNETINFO.gw[3]);
+	printf(" SN : %d.%d.%d.%d\r\n", gWIZNETINFO.sn[0], gWIZNETINFO.sn[1], gWIZNETINFO.sn[2], gWIZNETINFO.sn[3]);
+	printf("=======================================\r\n");
 }
 #endif
 
@@ -160,7 +187,6 @@ void Callback_TimeAssigned(void) {
     time_assigned = true;
     printf("NTP Time: %d.%d.%d %d:%d:%d \r\n",ntp_time.dd, ntp_time.mm, ntp_time.yy, ntp_time.hh, ntp_time.mm,ntp_time.ss);
 }
-
 
 // Reset W5500 module
 void resetW5500(void)
@@ -191,15 +217,23 @@ void initW5500() {
     uint8_t rx_tx_buff_sizes[] = {2, 2, 2, 2, 2, 2, 2, 2};
     wizchip_init(rx_tx_buff_sizes, rx_tx_buff_sizes);
 
-    printf("Calling STATIC_init()...\r\n");
+
     wiz_NetInfo net_info = {
-        .mac  = { 0xEA, 0x11, 0x22, 0x33, 0x44, 0xAA },
+    	.mac  = { 0xEA, 0x11, 0x22, 0x33, 0x44, 0xAB },
 #ifdef USER_MODE_DHCP
 		.dhcp = NETINFO_DHCP,
     };
+    printf("Calling DHCP_init()...\r\n");
+    /* wizchip netconf */
+    ctlnetwork(CN_SET_NETINFO, (void*) &net_info);
+//    // set MAC address before using DHCP
+//    setSHAR(net_info.mac);
+    getSHAR(net_info.mac);
+    printf("GET MAC: %02X.%02X.%02X.%02X.%02X.%02X\r\n",
+    		net_info.mac[0], net_info.mac[1], net_info.mac[2], net_info.mac[3],
+            net_info.mac[4], net_info.mac[5]
+        );
 
-    // set MAC address before using DHCP
-    setSHAR(net_info.mac);
     DHCP_init(DHCP_SOCKET, dhcp_buffer);
 
     printf("Registering DHCP callbacks...\r\n");
@@ -213,9 +247,12 @@ void initW5500() {
     // actually should be called in a loop, e.g. by timer
     uint32_t ctr = 10000;
     while((!ip_assigned) && (ctr > 0)) {
+//    	printf("%s >> Going DHCP_RUN: [%lu]: [%u]\r\n", __func__, ctr, DHCP_run());
         DHCP_run();
         ctr--;
     }
+
+
     if(!ip_assigned) {
         printf("\r\nIP was not assigned :(\r\n");
         return;
@@ -238,26 +275,16 @@ void initW5500() {
     printf("Calling wizchip_setnetinfo()...\r\n");
 	wizchip_setnetinfo(&net_info);
 
-	//printf("Calling DNS_init()...\r\n");
-	//DNS_init(DNS_SOCKET, dns_buffer);
 
-	{
-		char domain_name[] = "www.google.com";
-		printf("Resolving domain name \"%s\"...\r\n", domain_name);
-		int8_t res = DNS_run(dns, (uint8_t*)&domain_name, addr);
-		if(res != 1) {
-			printf("DNS_run() failed, res = %d", res);
-			return;
-		}
-		printf("Result: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2], addr[3]);
-	}
 #else
 		.dhcp = NETINFO_STATIC,
-		.ip	= { 192, 168, 1, 25},
+		.ip	= { 192, 168, 2, 25},
 		.sn = { 255, 255, 255, 0},
-		.gw	= { 192, 168, 1, 1},
-		.dns = {8, 8, 8, 8},
+		.gw	= { 192, 168, 2, 1},
+//		.dns = {8, 8, 8, 8},
+		.dns = { 192, 168, 2, 1},
 	};
+	printf("Calling STATIC_init()...\r\n");
     printf("IP:  %d.%d.%d.%d\r\nGW:  %d.%d.%d.%d\r\nNet: %d.%d.%d.%d\r\n",
          net_info.ip[0], net_info.ip[1], net_info.ip[2], net_info.ip[3],
          net_info.gw[0], net_info.gw[1], net_info.gw[2], net_info.gw[3],
@@ -283,8 +310,9 @@ void getNtpServerTimeStamp(void)
 	}
 	if (!time_assigned) {
 	  printf("\r\nTime was not assigned :(\r\n");
-	  return;
+	  close(SNTP_SOCKET);
 	}
+
 //
 }
 
@@ -330,6 +358,8 @@ int main(void)
   	resetW5500();
 	initW5500();
 	HAL_Delay(200);
+	getNtpServerTimeStamp();
+
 
 	eMBStatus = eMBTCPInit(MBTCP_PORT);
 	printf("%s MB TCP Init completed [%s]..\n", __func__, ((eMBStatus == MB_EPORTERR)?"porting layer error":"MB TCP Init Success"));
@@ -341,7 +371,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	getNtpServerTimeStamp();
+
 	HAL_Delay(1000);
 	printf("\r\nModbus-TCP Start!\r\n");
 

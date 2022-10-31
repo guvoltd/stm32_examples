@@ -216,6 +216,7 @@ uint16_t getSn_RX_RSR(uint8_t sn)
         val = WIZCHIP_READ(Sn_RX_RSR(sn));
         val = (val << 8) + WIZCHIP_READ(WIZCHIP_OFFSET_INC(Sn_RX_RSR(sn),1));
       }
+
    }while (val != val1);
    return val;
 }

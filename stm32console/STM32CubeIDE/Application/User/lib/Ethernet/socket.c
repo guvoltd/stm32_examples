@@ -157,16 +157,21 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
 
    	      break;
    	   case Sn_MR_UDP:
-   	      if(flag & SF_IGMP_VER2)
+   		  if(flag & SF_IGMP_VER2)
    	      {
    	         if((flag & SF_MULTI_ENABLE)==0) return SOCKERR_SOCKFLAG;
    	      }
    	      #if _WIZCHIP_ == 5500
+
       	      if(flag & SF_UNI_BLOCK)
       	      {
+
       	         if((flag & SF_MULTI_ENABLE) == 0) return SOCKERR_SOCKFLAG;
+      	         //printf("%s >> Going for UDP Socket ...\n", __func__);
       	      }
    	      #endif
+
+
    	      break;
    	   default:
    	      break;
@@ -201,7 +206,7 @@ int8_t socket(uint8_t sn, uint8_t protocol, uint16_t port, uint8_t flag)
    while(getSn_SR(sn) == SOCK_CLOSED);
    printf("%s >> Returning [%d]..\n", __func__, sn);
    return (int8_t)sn;
-}	   
+}
 
 int8_t close(uint8_t sn)
 {

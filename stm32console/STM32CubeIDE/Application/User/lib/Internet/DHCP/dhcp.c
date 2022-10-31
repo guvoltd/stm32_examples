@@ -51,7 +51,7 @@
 
 #include "socket.h"
 #include "dhcp.h"
-
+#include <stdio.h>
 /* If you want to display debug & processing message, Define _DHCP_DEBUG_ in dhcp.h */
 
 #ifdef _DHCP_DEBUG_
@@ -406,7 +406,6 @@ void send_DHCP_DISCOVER(void)
 #ifdef _DHCP_DEBUG_
 	printf("> Send DHCP_DISCOVER\r\n");
 #endif
-
 	sendto(DHCP_SOCKET, (uint8_t *)pDHCPMSG, RIP_MSG_SIZE, ip, DHCP_SERVER_PORT);
 }
 
@@ -673,14 +672,19 @@ int8_t parseDHCPMSG(void)
 
 uint8_t DHCP_run(void)
 {
-	uint8_t  type;
+	int8_t  type;
 	uint8_t  ret;
-
+	int8_t socRet = 0;
+#ifdef _DHCP_DEBUG_
+	printf("> DHCP STATE : [%d][%d]\r\n", dhcp_state, DHCP_SOCKET);
+#endif
 	if(dhcp_state == STATE_DHCP_STOP) return DHCP_STOPPED;
 
 	if(getSn_SR(DHCP_SOCKET) != SOCK_UDP)
-	   socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
-
+	{
+		socRet  = socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0);
+		printf("%s >> Socket create return : [%s:%d]\n", __func__, (socRet==0)?"Socket created":"Socket Error", socRet);
+	}
 	ret = DHCP_RUNNING;
 	type = parseDHCPMSG();
 
@@ -694,6 +698,7 @@ uint8_t DHCP_run(void)
    		dhcp_state = STATE_DHCP_DISCOVER;
    		break;
 		case STATE_DHCP_DISCOVER :
+			//printf("> STATE_DHCP_DISCOVER [%d]\r\n", type);
 			if (type == DHCP_OFFER){
 #ifdef _DHCP_DEBUG_
 				printf("> Receive DHCP_OFFER\r\n");
@@ -910,7 +915,12 @@ void DHCP_init(uint8_t s, uint8_t * buf)
       DHCP_CHADDR[5] = 0x00; 
       setSHAR(DHCP_CHADDR);     
    }
-
+#ifdef _DHCP_DEBUG_
+   printf("SET MAC: %02X.%02X.%02X.%02X.%02X.%02X\r\n",
+		   DHCP_CHADDR[0], DHCP_CHADDR[1], DHCP_CHADDR[2], DHCP_CHADDR[3],
+		   DHCP_CHADDR[4], DHCP_CHADDR[5]
+               );
+#endif
 	DHCP_SOCKET = s; // SOCK_DHCP
 	pDHCPMSG = (RIP_MSG*)buf;
 	DHCP_XID = 0x12345678;
